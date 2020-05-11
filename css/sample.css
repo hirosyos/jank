@@ -2,7 +2,7 @@ body{
     margin:0;
     padding:0;
     text-align:left;
-    font-size: 32px;
+    font-size: 12px;
 }
 header{
     background-color: #fff;
@@ -22,26 +22,69 @@ main{
     width:15%;
 }
 
+.resultArea{
+    display:flex;
+	align-items: center;
+	justify-content: center;
+
+}
+
+/*********************
+ * 結果記載エリア
+ *********************/
+.myResultArea{
+    width:20%
+}
+.myResultTxtArea{
+    text-align:left;
+ }
+.myResultNoArea{
+   text-align:right;
+   width:40px;
+}
+
+.resultGraph{
+    display:flex;
+	align-items: center;
+    justify-content: center;
+    width:100%;
+}
+.resultGraphArea{
+    width:100%;
+    text-align:center;
+}
+
+.yourResultArea{
+    width:20%
+}
+.yourResultNoArea{
+    text-align:left;
+    width:40px;
+ }
+.yourResultTxtArea{
+    text-align:right;
+}
+
 
 footer{
     background-color: #fff;
     border-bottom:1px solid #ccc;
     text-align: center;
 }
-p{
+/* p{
     font-size:200%;
     text-align: center;
     border-bottom:1px solid #fff;
     height:200px;
-}
-ul{
+} */
+.mainBtn{
     padding: 0;
     border-top: 1px solid #000000;
     display:table;  /* 定義 */
     table-layout: fixed;
     width:100%;
 }
-li{
+.mainBtn li{
     text-align: center;
     list-style-type:none;
     border: 1px solid #666;
