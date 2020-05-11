@@ -14,6 +14,73 @@
         <h1>Graph</h1>
     </header>
 
+    <canvas id="myChart"></canvas>
+    <canvas id="myChart2"></canvas>
+    <canvas id="myChart3"></canvas>
+
+    <!-- グラフ更新ボタン -->
+    <button type="button" id="btn">グラフを更新</button>
+
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.1/Chart.min.js"></script>
+
+    <script>
+        var ctx = document.getElementById('myChart').getContext('2d');
+        var chart = new Chart(ctx, {
+            // 作成したいチャートのタイプ
+            type: 'bar',
+
+            // データセットのデータ
+            data: {
+                labels: ["1月", "2月", "3月", "4月", "5月", "6月", "7月"],
+                datasets: [{
+                    label: "初めてのデータセット",
+                    backgroundColor: 'rgb(255, 99, 132)',
+                    borderColor: 'rgb(255, 99, 132)',
+                    data: [0, 10, 5, 2, 20, 30, 45],
+                }]
+            },
+
+            // ここに設定オプションを書きます
+            options: {}
+        });
+        // function addData(chart, label, data) {
+        //     chart.data.labels.push(label);
+        //     chart.data.datasets.forEach((dataset) => {
+        //         dataset.data.push(data);
+        //     });
+        //     chart.update();
+        // }
+
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+
+
+
+        (async () => {
+            for (let i = 0; i < 100; i++) {
+                await sleep(1000);
+                console.log('loop' + i);
+                chart.data.datasets[0].data[0] += 1;
+                // chart.data.labels.push(label);
+                // chart.data.datasets.forEach((dataset) => {
+                //     dataset.data.push(data);
+                // });
+                chart.update();
+            }
+        })();
+        // for (let i = 0; i < 100; i++) {
+        //     console.log('loop' + i);
+        //     console.log(chart.data.datasets.data[0]);
+        //     chart.data.datasets.data["1月"] += 1;
+        //     adddata(chart, "初めてのデータセット", chart.data.datasets.data);
+
+        // }
+
+    </script>
 </body>
 
 </html>

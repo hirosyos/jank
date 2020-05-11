@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/sample.css">
+    <title>Jank</title>
+</head>
+
+<body>
+    <header>
+        <h1>Jank</h1>
+    </header>
+
+    <main>
+        <ul class='mainBtn'>
+            <li id="gu_btn">グー</li>
+            <li id="cho_btn">チョキ</li>
+            <li id="par_btn">パー</li>
+            <li id="auto_btn">オート</li>
+        </ul>
+
+        <div class='simpleJankenArea'>
+            <div>自分</div>
+            <div id="jibun"></div>
+            <div>CPU
+            </div>
+            <div id="aite"></div>
+            <div>勝敗</div>
+            <div id="judgment"></div>
+        </div>
+
+    </main>
+
+    <footer></footer>
+
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.1/Chart.min.js"></script>
+
+    <script>
+        /********************************
+         * 定数定義
+         ********************************/
+
+        // グーチョキパー
+        const JANKEN_HAND_GU = 0;
+        const JANKEN_HAND_CHOKI = 1;
+        const JANKEN_HAND_PAR = 2;
+
+        // 文字列変換表
+        const JANKEN_HAND_TEXT_MTX = [
+            'グー',
+            'チョキ',
+            'パー'
+        ];
+
+        //勝ち負けあいこ
+        const JANKEN_JUDGE_WIN = 0;
+        const JANKEN_JUDGE_LOSS = 1;
+        const JANKEN_JUDGE_DRAW = 2;
+
+        // 文字列変換表
+        const JANKEN_JUDGE_TEXT_MTX = [
+            'かち',
+            'まけ',
+            'あいこ'
+        ];
+
+        // 勝ち負け判定マトリックス
+        // 1次元目:自分の手  2次元目:相手の手
+        const JANKEN_JUDGE_MTX = [
+            // 相手がグー,チョキ,パー
+            [JANKEN_JUDGE_DRAW, JANKEN_JUDGE_WIN, JANKEN_JUDGE_LOSS],   //自分がグー
+            [JANKEN_JUDGE_LOSS, JANKEN_JUDGE_DRAW, JANKEN_JUDGE_WIN],   //自分がチョキ
+            [JANKEN_JUDGE_WIN, JANKEN_JUDGE_LOSS, JANKEN_JUDGE_DRAW]    //自分がパー
+        ];
+
+        //IDの連想配列
+        const ID_TO_JANKEN_HAND = {
+            // なぜか直打ちじゃないと動かない
+            '#gu_btn': JANKEN_HAND_GU,
+            '#cho_btn': JANKEN_HAND_CHOKI,
+            '#par_btn': JANKEN_HAND_PAR
+        };
+        //乱数のパラメータ
+        const min = 0;
+        const max = 2;
+    </script>
+
+    <script>
+        /********************************
+         * 共通関数
+         ********************************/
+
+        /********************************
+         * スリープ関数
+         * @param in ms  ミリセカンド
+         ********************************/
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        /********************************
+         * 自分の手の表記を変える関数
+         * @param in inputId  ジャンケンの手
+         * @param in outputId 書き変える対象のID
+         ********************************/
+        function jibunIdToJankenHand(jankenHand, outputId) {
+            let jankenTxt = JANKEN_HAND_TEXT_MTX[jankenHand]    //入力されたジャンケンの数値をテキストに変える
+            $(outputId).text(jankenTxt);
+            return;
+        }
+
+        /********************************
+         * 相手の手の表記を変える関数
+         * @param in jankenHand  ジャンケンの手
+         * @param in outputId 書き変える対象のID
+         ********************************/
+        function aiteIdToJankenHand(jankenHand, outputId) {
+            let jankenTxt = JANKEN_HAND_TEXT_MTX[jankenHand]    //入力されたジャンケンの数値をテキストに変える
+            $(outputId).text(jankenTxt);
+            return;
+        }
+
+    </script>
+
+    <script>
+        /********************************
+         * ジャンケンデータオブジェクト
+         ********************************/
+        // let jankenData = function () {
+        //     this.numOfGu = 0,     //グーを出した数
+        //         this.numOfPar = 0,    //パーを出した数
+        //         this.numOfChoki = 0,  //チョキを出した数
+        //         this.numOfWin = 0,    //勝った数
+        //         this.numOfLoss = 0,   //負けた数
+        //         this.numOfEven = 0,   //あいこの数
+        //         this.lastCombo = 0,   //直近のコンボ数
+        //         this.maxCombo = 0,    //最大コンボ数
+        //         this.nomalPoint = 0,  //通常のポイント
+        //         this.comboPoint = 0   //連勝ポイント
+        // }
+
+        // let myJankenData = new jankenData;
+        // let yourJankenData = new jankenData;
+
+
+        //自分用集計データ
+        let my_numOfHandKind = [0, 0, 0];    //グー、チョキ、パーを出した数
+        let my_numOfJudge = [0, 0, 0];       //勝ち、負け、あいこになった数
+        let my_numOfLastCombo = 0;           //直近の連勝数
+        let my_numOfMaxCombo = 0;            //最大連勝数
+        let my_nomalPoint = 0;               //通常ポイント
+        let my_comboPoint = 0;               //連勝ポイント
+
+        //相手用集計データ
+        let your_numOfHandKind = [0, 0, 0];  //グー、チョキ、パーを出した数
+        let your_numOfJudge = [0, 0, 0];     //勝ち、負け、あいこになった数
+        let your_numOfLastCombo = 0;         //直近の連勝数
+        let your_numOfMaxCombo = 0;          //最大連勝数
+        let your_nomalPoint = 0;             //通常ポイント
+        let your_comboPoint = 0;             //連勝ポイント
+
+        /********************************
+         * オート機能
+         ********************************/
+        $(function () {
+            $('#auto_btn').on('click', function () {
+
+                //クリックされたIDを求める
+                clickID = '#' + $(this).attr("id");
+                //デバッグ出力
+                console.log('id  ' + clickID);
+
+                //自動でジャンケンを繰り返す
+                (async () => {
+                    //デバッグ出力
+                    console.log('aaaaaa  ');
+                    for (let i = 0; i < 100; i++) {
+
+                        //0-2の乱数をJANKEN_HANDとし、それをもとに自分の出した手の表記を変える
+                        let myHand = Math.floor(Math.random() * max - min + 1) + min;
+                        jibunIdToJankenHand(myHand, '#jibun');
+
+                        //0-2の乱数をJANKEN_HANDとし、それをもとに相手の出した手の表記を変える
+                        let yourHand = Math.floor(Math.random() * max - min + 1) + min;
+                        aiteIdToJankenHand(yourHand, '#aite')
+
+                        //勝敗判定
+                        let myJudge = JANKEN_JUDGE_TEXT_MTX[JANKEN_JUDGE_MTX[myHand][yourHand]];
+                        let yourJudge = JANKEN_JUDGE_TEXT_MTX[JANKEN_JUDGE_MTX[yourHand][myHand]];
+                        $('#judgment').text(myJudge);
+
+                        //自分用集計データ
+                        my_numOfHandKind[myHand] += 1;    //グー、チョキ、パーを出した数
+                        my_numOfJudge[myJudge] += 1;      //勝ち、負け、あいこになった数
+
+                        //勝ちの場合の一連の処理
+                        if (myJudge == JANKEN_JUDGE_WIN) {
+                            //直近連勝数を更新し直近連勝数が最大連勝数を超えるようなら
+                            //最大連勝数の更新
+                            my_numOfLastCombo += 1;
+                            if (my_numOfLastCombo > my_numOfMaxCombo) {
+                                my_numOfMaxCombo = my_numOfLastCombo;
+                            }
+                            //通常ポイントアップ
+                            my_nomalPoint += 1;
+                            //連勝ポイントアップ
+                            my_comboPoint += 2 ** my_numOfLastCombo;
+                        }
+                        //負けの場合の一連の処理
+                        else if (myJudge == JANKEN_JUDGE_LOSS) {
+                            //直近連勝数のリセット
+                            my_numOfLastCombo = 0;
+                        }
+
+                        //相手用集計データ
+                        your_numOfHandKind[yourHand] += 1;    //グー、チョキ、パーを出した数
+                        your_numOfJudge[yourJudge] += 1;      //勝ち、負け、あいこになった数
+
+                        //勝ちの場合の一連の処理
+                        if (yourJudge == JANKEN_JUDGE_WIN) {
+                            //直近連勝数を更新し直近連勝数が最大連勝数を超えるようなら
+                            //最大連勝数の更新
+                            your_numOfLastCombo += 1;
+                            if (your_numOfLastCombo > your_numOfMaxCombo) {
+                                your_numOfMaxCombo = your_numOfLastCombo;
+                            }
+                            //通常ポイントアップ
+                            your_nomalPoint += 1;
+                            //連勝ポイントアップ
+                            your_comboPoint += 2 ** your_numOfLastCombo;
+                        }
+                        //負けの場合の一連の処理
+                        else if (yourJudge == JANKEN_JUDGE_LOSS) {
+                            //直近連勝数のリセット
+                            your_numOfLastCombo = 0;
+                        }
+
+                        //相手用集計データ
+                        your_numOfHandKind[yourHand] += 1;   //グー、チョキ、パーを出した数
+                        your_numOfJudge[yourJudge] += 1;     //勝ち、負け、あいこになった数
+                        your_numOfLastCombo = 0;             //直近の連勝数
+                        your_numOfMaxCombo = 0;              //最大連勝数
+                        your_nomalPoint = 0;                 //通常ポイント
+                        your_comboPoint = 0;                 //連勝ポイント
+
+                        //オート間隔
+                        await sleep(100);
+
+                    }
+                })();
+            });
+        });
+    </script>
+
+
+    <script>
+        /********************************
+         * シンプル機能
+         ********************************/
+        $(function () {
+            /********************************
+             * ジャンケン機能 メイン
+             ********************************/
+            //三つ同時に判定
+            $('#gu_btn, #cho_btn, #par_btn').on('click', function () {
+
+                //クリックされたIDを求める
+                let clickID = '#' + $(this).attr("id");
+                //デバッグ出力
+                console.log('id  ' + clickID);
+
+                //クリックされたIDをJANKEN_HANDとし、それをもとに自分の出した手の表記を変える
+                let myHand = ID_TO_JANKEN_HAND[clickID];
+                jibunIdToJankenHand(myHand, '#jibun');
+
+                //0-2の乱数をJANKEN_HANDとし、それをもとに相手の出した手の表記を変える
+                let yourHand = Math.floor(Math.random() * max - min + 1) + min;
+                aiteIdToJankenHand(yourHand, '#aite')
+
+                //勝敗判定
+                let judge = JANKEN_JUDGE_TEXT_MTX[JANKEN_JUDGE_MTX[myHand][yourHand]];
+                $('#judgment').text(judge);
+
+            })
+        });
+    </script>
+
+</body>
+
+</html>

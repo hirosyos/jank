@@ -12,6 +12,17 @@ header{
 main{
     border-bottom:1px solid #ccc;
 }
+
+.simpleJankenArea{
+    display:flex;
+	align-items: center;
+	justify-content: center;
+}
+.simpleJankenArea div{
+    width:15%;
+}
+
+
 footer{
     background-color: #fff;
     border-bottom:1px solid #ccc;
