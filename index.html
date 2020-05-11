@@ -10,7 +10,11 @@
 
 <body>
     <header>
-        <h1>Jank</h1>
+        <img src="img/junk_logo.png" alt="イメージロゴ">
+        グーチョキパーボタンで単発ジャンケン/オートで複数回ジャンケン <br>
+        簡単操作で設定できる、多彩なストラテジー(※)を駆使して相手を打ち負かそう <br>
+        (※)機能は今後のアップデートで対応予定となります
+        <img src="img/junk_logo.png" alt="イメージロゴ">
     </header>
 
     <main>
@@ -76,15 +80,56 @@
                     <td>合計ポイント</td>
                     <td class='myResultNoArea' id="my_pointSum_ID">0</td>
                 </tr>
+                <tr>
+                    <td>ー</td>
+                    <td class='myResultNoArea'></td>
+                </tr>
+                <tr>
+                    <td>データ分析</td>
+                    <td class='myResultNoArea'></td>
+                </tr>
+                <tr>
+                    <td>グー率</td>
+                    <td class='myResultNoArea' id="my_ratioOfHandKind_Gu_ID">0</td>
+                </tr>
+                <tr>
+                    <td>チョキ率</td>
+                    <td class='myResultNoArea' id="my_ratioOfHandKind_Choki_ID">0</td>
+                </tr>
+                <tr>
+                    <td>パー率</td>
+                    <td class='myResultNoArea' id="my_ratioOfHandKind_Par_ID">0</td>
+                </tr>
+                <tr>
+                    <td>勝ち率</td>
+                    <td class='myResultNoArea' id="my_ratioOfJudge_Win_ID">0</td>
+                </tr>
+                <tr>
+                    <td>負け率</td>
+                    <td class='myResultNoArea' id="my_ratioOfJudge_Loss_ID">0</td>
+                </tr>
+                <tr>
+                    <td>あいこ率</td>
+                    <td class='myResultNoArea' id="my_ratioOfJudge_Even_ID">0</td>
+                </tr>
+                <tr>
+                    <td>コンボボーナス率</td>
+                    <td class='myResultNoArea' id="my_ratioOfcomboPoint_ID">0</td>
+                </tr>
             </table>
 
+
             <div class r='esultGraph'>
-                <div class='resultGraphArea'>自分グラフ
+                <div class='resultGraphArea'>勝敗データ
                     <canvas id="myChart"></canvas>
+                </div>
+                <div class='resultGraphArea'>勝敗割合
+                    <canvas id="myChart2"></canvas>
                 </div>
             </div>
 
-            <table class='resultTxtArea'>
+
+            <table class='yourResultArea'>
                 <tr>
                     <td class='yourResultNoArea' id="aite"></td>
                     <td class='yourResultTxtArea'>相手の手</td>
@@ -133,8 +178,43 @@
                     <td class='yourResultNoArea' id="your_pointSum_ID">0</td>
                     <td class='yourResultTxtArea'>ポイント合計</td>
                 </tr>
+                <tr>
+                    <td class='yourResultNoArea'></td>
+                    <td class='yourResultTxtArea'>ー</td>
+                </tr>
+                <tr>
+                    <td class='yourResultNoArea'></td>
+                    <td class='yourResultTxtArea'>データ分析</td>
+                </tr>
+                <tr>
+                    <td class='yourResultNoArea' id="your_ratioOfHandKind_Gu_ID">0</td>
+                    <td class='yourResultTxtArea'>グー率</td>
+                </tr>
+                <tr>
+                    <td class='yourResultNoArea' id="your_ratioOfHandKind_Choki_ID">0</td>
+                    <td class='yourResultTxtArea'>チョキ率</td>
+                </tr>
+                <tr>
+                    <td class='yourResultNoArea' id="your_ratioOfHandKind_Par_ID">0</td>
+                    <td class='yourResultTxtArea'>パー率</td>
+                </tr>
+                <tr>
+                    <td class='yourResultNoArea' id="your_ratioOfJudge_Win_ID">0</td>
+                    <td class='yourResultTxtArea'>勝ち率</td>
+                </tr>
+                <tr>
+                    <td class='yourResultNoArea' id="your_ratioOfJudge_Loss_ID">0</td>
+                    <td class='yourResultTxtArea'>負け率</td>
+                </tr>
+                <tr>
+                    <td class='yourResultNoArea' id="your_ratioOfJudge_Even_ID">0</td>
+                    <td class='yourResultTxtArea'>あいこ率</td>
+                </tr>
+                <tr>
+                    <td class='yourResultNoArea' id="your_ratioOfcomboPoint_ID">0</td>
+                    <td class='yourResultTxtArea'>コンボボーナス率</td>
+                </tr>
             </table>
-
 
     </main>
 
@@ -148,6 +228,9 @@
         /********************************
          * 定数定義
          ********************************/
+
+        //ループ回数
+        const JANKEN_ROOP_MAX = 1000;
 
         // グーチョキパー
         const JANKEN_HAND_GU = 0;
@@ -217,6 +300,33 @@
                         backgroundColor: 'rgb(255, 0, 132)',
                         borderColor: 'rgb(255, 0, 132)',
                         data: [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    }
+                ]
+            },
+
+            // ここに設定オプションを書きます
+            options: {}
+        });
+
+        var ctx = document.getElementById('myChart2').getContext('2d');
+        var chart2 = new Chart(ctx, {
+            // 作成したいチャートのタイプ
+            type: 'bar',
+
+            // データセットのデータ
+            data: {
+                labels: ["グー率", "チョキ率", "パー率", "勝ち率", "負け率", "あいこ率"],
+                datasets: [
+                    {
+                        label: "自分",
+                        backgroundColor: 'rgb(00, 128, 00)',
+                        borderColor: 'rgb(255, 99, 132)',
+                        data: [0, 0, 0, 0, 0, 0],
+                    }, {
+                        label: "相手",
+                        backgroundColor: 'rgb(255, 0, 132)',
+                        borderColor: 'rgb(255, 0, 132)',
+                        data: [0, 0, 0, 0, 0, 0],
                     }
                 ]
             },
@@ -295,7 +405,7 @@
                 //自動でジャンケンを繰り返す
                 (async () => {
                     //デバッグ出力
-                    for (let i = 0; i < 100; i++) {
+                    for (let JankCount = 1; JankCount <= JANKEN_ROOP_MAX; JankCount++) {
 
                         //0-2の乱数をJANKEN_HANDとし、それをもとに自分の出した手の表記を変える
                         let myHand = Math.floor(Math.random() * (max - min + 1)) + min;
@@ -329,13 +439,19 @@
                             my_nomalPoint += 1;
                             //連勝ポイントアップ
                             if (my_numOfLastCombo > 1) {
-                                // my_comboPoint += my_numOfLastCombo;
-                                my_comboPoint += 1;
+                                my_comboPoint += my_numOfLastCombo;
+                                // my_comboPoint += 1;
                             }
 
                         }
                         //負けの場合の一連の処理
                         else if (myJudeCode == JANKEN_JUDGE_LOSS) {
+                            //直近連勝数のリセット
+                            my_numOfLastCombo = 0;
+
+                        }
+                        //あいこの場合の一連の処理
+                        else if (myJudeCode == JANKEN_JUDGE_DRAW) {
                             //直近連勝数のリセット
                             my_numOfLastCombo = 0;
                         }
@@ -356,11 +472,16 @@
                             your_nomalPoint += 1;
                             //連勝ポイントアップ
                             if (your_numOfLastCombo > 1) {
-                                // your_comboPoint += your_numOfLastCombo;
-                                your_comboPoint += 1;
+                                your_comboPoint += your_numOfLastCombo;
+                                // your_comboPoint += 1;
                             }
                         }
                         //負けの場合の一連の処理
+                        else if (yourJudgeCode == JANKEN_JUDGE_LOSS) {
+                            //直近連勝数のリセット
+                            your_numOfLastCombo = 0;
+                        }
+                        //あいこの場合の一連の処理
                         else if (yourJudgeCode == JANKEN_JUDGE_LOSS) {
                             //直近連勝数のリセット
                             your_numOfLastCombo = 0;
@@ -379,6 +500,31 @@
                         $(my_comboPoint_ID).text(my_comboPoint);
                         $(my_pointSum_ID).text(my_nomalPoint + my_comboPoint);
 
+                        $(my_ratioOfHandKind_Gu_ID).text(
+                            Math.floor(my_numOfHandKind[JANKEN_HAND_GU] / JankCount * 100)
+                        );
+                        $(my_ratioOfHandKind_Par_ID).text(
+                            Math.floor(my_numOfHandKind[JANKEN_HAND_CHOKI] / JankCount * 100)
+                        );
+                        $(my_ratioOfHandKind_Choki_ID).text(
+                            Math.floor(my_numOfHandKind[JANKEN_HAND_PAR] / JankCount * 100)
+                        );
+                        $(my_ratioOfJudge_Win_ID).text(
+                            Math.floor(my_numOfJudge[JANKEN_JUDGE_WIN] / JankCount * 100)
+                        );
+                        $(my_ratioOfJudge_Loss_ID).text(
+                            Math.floor(my_numOfJudge[JANKEN_JUDGE_LOSS] / JankCount * 100)
+                        );
+                        $(my_ratioOfJudge_Even_ID).text(
+                            Math.floor(my_numOfJudge[JANKEN_JUDGE_DRAW] / JankCount * 100)
+                        );
+                        $(my_ratioOfcomboPoint_ID).text(
+                            Math.floor(my_comboPoint / (my_nomalPoint + my_comboPoint) * 100)
+                        );
+
+
+
+
                         $(your_numOfHandKind_Gu_ID).text(your_numOfHandKind[JANKEN_HAND_GU]);
                         $(your_numOfHandKind_Par_ID).text(your_numOfHandKind[JANKEN_HAND_CHOKI]);
                         $(your_numOfHandKind_Choki_ID).text(your_numOfHandKind[JANKEN_HAND_PAR]);
@@ -390,6 +536,30 @@
                         $(your_nomalPoint_ID).text(your_nomalPoint);
                         $(your_comboPoint_ID).text(your_comboPoint);
                         $(your_pointSum_ID).text(your_nomalPoint + your_comboPoint);
+
+                        $(your_ratioOfHandKind_Gu_ID).text(
+                            Math.floor(your_numOfHandKind[JANKEN_HAND_GU] / JankCount * 100)
+                        );
+                        $(your_ratioOfHandKind_Par_ID).text(
+                            Math.floor(your_numOfHandKind[JANKEN_HAND_CHOKI] / JankCount * 100)
+                        );
+                        $(your_ratioOfHandKind_Choki_ID).text(
+                            Math.floor(your_numOfHandKind[JANKEN_HAND_PAR] / JankCount * 100)
+                        );
+                        $(your_ratioOfJudge_Win_ID).text(
+                            Math.floor(your_numOfJudge[JANKEN_JUDGE_WIN] / JankCount * 100)
+                        );
+                        $(your_ratioOfJudge_Loss_ID).text(
+                            Math.floor(your_numOfJudge[JANKEN_JUDGE_LOSS] / JankCount * 100)
+                        );
+                        $(your_ratioOfJudge_Even_ID).text(
+                            Math.floor(your_numOfJudge[JANKEN_JUDGE_DRAW] / JankCount * 100)
+                        );
+                        $(your_ratioOfcomboPoint_ID).text(
+                            Math.floor(your_comboPoint / (your_nomalPoint + your_comboPoint) * 100)
+                        );
+
+
 
                         //グラフの更新
                         chart.data.datasets[0].data[0] = my_numOfHandKind[JANKEN_HAND_GU];
@@ -414,10 +584,36 @@
 
                         chart.update();
 
+                        chart2.data.datasets[0].data[0] = Math.floor(my_numOfHandKind[JANKEN_HAND_GU] / JankCount * 100);
+                        chart2.data.datasets[0].data[1] = Math.floor(my_numOfHandKind[JANKEN_HAND_CHOKI] / JankCount * 100);
+                        chart2.data.datasets[0].data[2] = Math.floor(my_numOfHandKind[JANKEN_HAND_PAR] / JankCount * 100);
+                        chart2.data.datasets[0].data[3] = Math.floor(my_numOfJudge[JANKEN_JUDGE_WIN] / JankCount * 100);
+                        chart2.data.datasets[0].data[4] = Math.floor(my_numOfJudge[JANKEN_JUDGE_LOSS] / JankCount * 100);
+                        chart2.data.datasets[0].data[5] = Math.floor(my_numOfJudge[JANKEN_JUDGE_DRAW] / JankCount * 100);
+
+                        chart2.data.datasets[1].data[0] = Math.floor(your_numOfHandKind[JANKEN_HAND_GU] / JankCount * 100);
+                        chart2.data.datasets[1].data[1] = Math.floor(your_numOfHandKind[JANKEN_HAND_CHOKI] / JankCount * 100);
+                        chart2.data.datasets[1].data[2] = Math.floor(your_numOfHandKind[JANKEN_HAND_PAR] / JankCount * 100);
+                        chart2.data.datasets[1].data[3] = Math.floor(your_numOfJudge[JANKEN_JUDGE_WIN] / JankCount * 100);
+                        chart2.data.datasets[1].data[4] = Math.floor(your_numOfJudge[JANKEN_JUDGE_LOSS] / JankCount * 100);
+                        chart2.data.datasets[1].data[5] = Math.floor(your_numOfJudge[JANKEN_JUDGE_DRAW] / JankCount * 100);
+
+
+                        chart2.update();
+
 
                         //オート間隔
-                        await sleep(100);
+                        await sleep(0.1);
 
+                    }
+                    // 総合結果判定
+                    if (chart.data.datasets[0].data[8] > chart.data.datasets[1].data[8]) {
+                        $('#judgment').text('総合勝利!!');
+                    } else if (chart.data.datasets[0].data[8] < chart.data.datasets[1].data[8]) {
+                        $('#judgment').text('総合敗北!!');
+                    }
+                    else {
+                        $('#judgment').text('奇跡の総合あいこ!!');
                     }
                 })();
             });
