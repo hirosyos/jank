@@ -33,6 +33,18 @@
         <div class='resultArea'>
             <table class='myResultArea'>
                 <tr>
+                    <td>Player1 Name</td>
+                </tr>
+                <tr>
+                    <td>
+                        <input type="text" id="player1Name">
+                    </td>
+                </tr>
+                <tr>
+                    <td>ー</td>
+                    <td class='myResultNoArea'></td>
+                </tr>
+                <tr>
                     <td>自分の手</td>
                     <td class='myResultNoArea' id="jibun"></td>
                 </tr>
@@ -131,6 +143,21 @@
 
             <table class='yourResultArea'>
                 <tr>
+                    <td class='yourResultNoArea'></td>
+                    <td>Player2 Name</td>
+                </tr>
+                <tr>
+
+                    <td class='yourResultNoArea'></td>
+                    <td>
+                        <input type="text" id="player2Name">
+                    </td>
+                </tr>
+                <tr>
+                    <td class='yourResultNoArea'></td>
+                    <td class='yourResultTxtArea'>ー</td>
+                </tr>
+                <tr>
                     <td class='yourResultNoArea' id="aite"></td>
                     <td class='yourResultTxtArea'>相手の手</td>
                 </tr>
@@ -218,7 +245,30 @@
 
     </main>
 
-    <footer></footer>
+    <footer>
+        <div class="rankingSnd">
+            <a href="" class="rankingSndBtn" class="js-modal-open" id='ranking'>ランキングを見る</a>
+        </div>
+
+        <!-- <div class="content">
+            <a class="js-modal-open" href="">クリックでモーダルを表示</a>
+        </div> -->
+        <div class="modal js-modal">
+            <div class="modal__bg js-modal-close"></div>
+            <div class="modal__content">
+                <p>1.</p>
+                <p id='rank1_userName'></p>
+                <p id='rank1_totalScore'></p>
+                <p>2.</p>
+                <p id='rank2_userName'></p>
+                <p id='rank2_totalScore'></p>
+                <p>モーダルウィンドウを閉じる場合は下の「閉じる」をクリックするか、背景の黒い部分をクリックしても閉じることができます。</p>
+                <a class="js-modal-close" href="">閉じる</a>
+            </div>
+            <!--modal__inner-->
+        </div>
+        <!--modal-->
+    </footer>
 
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
@@ -615,6 +665,26 @@
                     else {
                         $('#judgment').text('奇跡の総合あいこ!!');
                     }
+
+                    // ランキング更新
+                    const player1Name = $('#player1Name').val();
+                    const player1Score = my_nomalPoint + my_comboPoint;
+                    const player2Name = $('#player2Name').val();
+                    const player2Score = your_nomalPoint + your_comboPoint;
+                    const rankingData = [
+                        {
+                            userName: player1Name,
+                            totalScore: my_nomalPoint + my_comboPoint,
+                        },
+                        {
+                            userName: player2Name,
+                            totalScore: your_nomalPoint + your_comboPoint,
+                        },
+                    ];
+                    const jsonData = JSON.stringify(rankingData);
+                    console.log(rankingData);
+                    console.log(jsonData);
+                    localStorage.setItem('rankingLocalStrage', jsonData);
                 })();
             });
         });
@@ -651,6 +721,51 @@
 
             })
         });
+    </script>
+    <script>
+        //ランキングを見るボタン クリックイベント
+        $('#ranking').on('click', function () {
+            const jsonData = localStorage.getItem('rankingLocalStrage');
+            console.log(jsonData);
+            const data = JSON.parse(jsonData);
+            console.log(data);
+
+            $('#rank1_userName').val(data[0].userName);
+            $('#rank1_totalScore').val(data[0].totalScore);
+            $('#rank2_userName').val(data[1].userName);
+            $('#rank2_totalScore').val(data[1].totalScore);
+
+
+            $('.js-modal').fadeIn();
+            return false;
+            // const title = $('#input').val();
+            // console.log(title);
+            // const text = $('#text_area').val();
+            // const data = {
+            //     title: title,
+            //     text: text,
+            // };
+            // const jsonData = JSON.stringify(data);
+            // console.log(data);
+            // console.log(jsonData);
+            // localStorage.setItem('memo', jsonData);
+
+
+        });
+        $('.js-modal-close').on('click', function () {
+            $('.js-modal').fadeOut();
+            return false;
+        });
+        // $(function () {
+        //     $('.js-modal-open').on('click', function () {
+        //         $('.js-modal').fadeIn();
+        //         return false;
+        //     });
+        //     $('.js-modal-close').on('click', function () {
+        //         $('.js-modal').fadeOut();
+        //         return false;
+        //     });
+        // });
     </script>
 
 </body>

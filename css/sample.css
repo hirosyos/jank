@@ -37,9 +37,12 @@ main{
 	align-items: center;
     justify-content: space-between;
 }
+.resultArea input{
+    width:80px;
+}
 
 .myResultArea{
-    width:15%;
+    width:20%;
 }
 .myResultTxtArea{
     text-align:left;
@@ -61,7 +64,7 @@ main{
 }
 
 .yourResultArea{
-    width:15%;
+    width:20%;
 }
 .yourResultNoArea{
     text-align:left;
@@ -73,9 +76,11 @@ main{
 
 
 footer{
+    display:flex;
+	align-items: center;
+	justify-content: center;
     background-color: #fff;
     border-bottom:1px solid #ccc;
-    text-align: center;
 }
 /* p{
     font-size:200%;
@@ -101,4 +106,56 @@ footer{
 li:hover{
     background: #0066CC;
     color:#fff;
+}
+
+/****************************************
+ * ランキングボタン
+ ****************************************/
+ .rankingSnd{
+    text-align:center;
+	margin: 120pxpx 0px 120px 0px; /* 上右下左 */
+}
+.rankingSndBtn {
+	/* display: inline-block; */
+	display:flex;
+	align-items: center;
+	justify-content: center;
+	padding: 0.5em 1em;
+	text-decoration: none;
+	background: #ffd61a;/*ボタン色*/
+	color:black;
+	border-bottom: solid 4px #627295;
+	border-radius: 3px;
+	height:50px;
+	width:150px;
+  }
+.rankingSndBtn:active {
+	/*ボタンを押したとき*/
+	-webkit-transform: translateY(4px);
+	transform: translateY(4px);/*下に動く*/
+	box-shadow: 0px 0px 1px rgba(0, 0, 0, 0.2);/*影を小さく*/
+	border-bottom: none;
+  }
+
+  .modal{
+    display: none;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    width: 100%;
+}
+.modal__bg{
+    background: rgba(0,0,0,0.8);
+    height: 100vh;
+    position: absolute;
+    width: 100%;
+}
+.modal__content{
+    background: #fff;
+    left: 50%;
+    padding: 40px;
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%,-50%);
+    width: 60%;
 }
