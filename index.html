@@ -143,7 +143,7 @@
 
             <table class='yourResultArea'>
                 <tr>
-                    <td class='yourResultNoArea'></td>
+                    <td class='yourResultNoArea' </td>
                     <td>Player2 Name</td>
                 </tr>
                 <tr>
@@ -262,7 +262,29 @@
                 <p>2.</p>
                 <p id='rank2_userName'></p>
                 <p id='rank2_totalScore'></p>
-                <p>モーダルウィンドウを閉じる場合は下の「閉じる」をクリックするか、背景の黒い部分をクリックしても閉じることができます。</p>
+
+                <!-- <tr>
+                    <th>ランク</th>
+                    <th>プレイヤー</th>
+                    <th>トータルスコア</th>
+                </tr>
+                <tr>
+                    <td>1.</td>
+                    <td id='rank1_userName'></td>
+                    <td id='rank1_totalScore'></td>
+                </tr>
+                <tr>
+                    <td>2.</td>
+                    <td id='rank2_userName'></td>
+                    <td id='rank_totalScore'></td>
+                </tr>
+                <tr>
+                    <td>3.</td>
+                    <td></td>
+                    <td></td>
+                </tr> -->
+
+                <p>ウィンドウを閉じる場合は下の「閉じる」をクリックするか、背景の黒い部分をクリックしても閉じることができます。</p>
                 <a class="js-modal-close" href="">閉じる</a>
             </div>
             <!--modal__inner-->
@@ -280,7 +302,7 @@
          ********************************/
 
         //ループ回数
-        const JANKEN_ROOP_MAX = 1000;
+        const JANKEN_ROOP_MAX = 100;
 
         // グーチョキパー
         const JANKEN_HAND_GU = 0;
@@ -666,6 +688,8 @@
                         $('#judgment').text('奇跡の総合あいこ!!');
                     }
 
+
+
                     // ランキング更新
                     const player1Name = $('#player1Name').val();
                     const player1Score = my_nomalPoint + my_comboPoint;
@@ -681,10 +705,28 @@
                             totalScore: your_nomalPoint + your_comboPoint,
                         },
                     ];
+
+                    // ランキングデータをスコアの高い順にソートする
+                    rankingData.sort(function (a, b) {
+                        if (a.totalScore > b.totalScore) {
+                            return -1;
+                        } else {
+                            return 1;
+                        }
+                    });
+
+
                     const jsonData = JSON.stringify(rankingData);
                     console.log(rankingData);
                     console.log(jsonData);
                     localStorage.setItem('rankingLocalStrage', jsonData);
+
+                    // 直近プレイヤー情報保存
+                    const lastPlayerData = {
+                        lastPlayer1: player1Name,
+                        lastPlayer2: player2Name
+                    }
+                    localStorage.setItem('lastPlayerLocalStrage', lastPlayerData);
                 })();
             });
         });
@@ -730,10 +772,12 @@
             const data = JSON.parse(jsonData);
             console.log(data);
 
-            $('#rank1_userName').val(data[0].userName);
-            $('#rank1_totalScore').val(data[0].totalScore);
-            $('#rank2_userName').val(data[1].userName);
-            $('#rank2_totalScore').val(data[1].totalScore);
+            console.log(data[0].userName);
+
+            $('#rank1_userName').text(data[0].userName);
+            $('#rank1_totalScore').text(data[0].totalScore);
+            $('#rank2_userName').text(data[1].userName);
+            $('#rank2_totalScore').text(data[1].totalScore);
 
 
             $('.js-modal').fadeIn();
@@ -766,6 +810,17 @@
         //         return false;
         //     });
         // });
+    </script>
+
+    <script>
+        $(function () {
+            //ページ読み込み：保存データ取得表示
+            if (localStorage.getItem('lastPlayerLocalStrage')) {
+                const text = localStorage.getItem('lastPlayerLocalStrage');
+                $('#player1Name').val(text.lastPlayer1);
+                $('#player2Name').val(text.lastPlayer2);
+            }
+        });
     </script>
 
 </body>
